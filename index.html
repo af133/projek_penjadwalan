@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Jadwal App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2em;
+      max-width: 800px;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    form {
+      margin-bottom: 1.5em;
+    }
+    input, textarea, button {
+      padding: 0.5em;
+      margin: 0.2em 0;
+      font-size: 1em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1em;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5em;
+      text-align: left;
+    }
+    button {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Jadwal App</h1>
+  <!-- Form untuk menambahkan jadwal baru -->
+  <form id="addScheduleForm">
+    <input type="text" id="title" placeholder="Judul" required>
+    <input type="date" id="date" required>
+    <br>
+    <textarea id="description" placeholder="Deskripsi" rows="3"></textarea>
+    <br>
+    <button type="submit">Tambah Jadwal</button>
+  </form>
+
+  <h2>Daftar Jadwal</h2>
+  <table id="scheduleTable">
+    <thead>
+      <tr>
+        <th>Judul</th>
+        <th>Tanggal</th>
+        <th>Deskripsi</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Baris jadwal akan ditampilkan di sini -->
+    </tbody>
+  </table>
+
+  <!-- Link share via WhatsApp -->
+  <p>
+    <a id="shareLink" href="#" target="_blank">Bagikan via WhatsApp</a>
+  </p>
+
+  <script>
+    let schedules = [];
+
+    // Fungsi untuk meng-encode data ke base64
+    function encodeData(data) {
+      return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+    }
+
+    // Fungsi untuk mendecode data dari base64
+    function decodeData(encoded) {
+      try {
+        return JSON.parse(decodeURIComponent(escape(atob(encoded))));
+      } catch (e) {
+        console.error("Decode error:", e);
+        return [];
+      }
+    }
+
+    // Update URL dengan data jadwal yang ter-encode dan update link WhatsApp
+    function updateURL() {
+      const encoded = encodeData(schedules);
+      const newURL = window.location.protocol + "//" + window.location.host + window.location.pathname + '?data=' + encoded;
+      window.history.replaceState(null, '', newURL);
+      // Update link share
+      const shareLink = document.getElementById('shareLink');
+      shareLink.href = 'https://wa.me/?text=' + encodeURIComponent("Cek jadwal ini: " + newURL);
+    }
+
+    // Render jadwal ke dalam tabel
+    function renderSchedules() {
+      const tbody = document.getElementById('scheduleTable').getElementsByTagName('tbody')[0];
+      tbody.innerHTML = ''; // Kosongkan tabel
+      if (schedules.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 4;
+        td.textContent = "Belum ada jadwal.";
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+      } else {
+        schedules.forEach(schedule => {
+          const tr = document.createElement('tr');
+
+          const tdTitle = document.createElement('td');
+          tdTitle.textContent = schedule.title;
+          const tdDate = document.createElement('td');
+          tdDate.textContent = schedule.date;
+          const tdDescription = document.createElement('td');
+          tdDescription.textContent = schedule.description;
+          const tdActions = document.createElement('td');
+
+          // Tombol Edit
+          const editBtn = document.createElement('button');
+          editBtn.textContent = 'Edit';
+          editBtn.onclick = function() {
+            editSchedule(schedule.id);
+          };
+
+          // Tombol Hapus
+          const deleteBtn = document.createElement('button');
+          deleteBtn.textContent = 'Hapus';
+          deleteBtn.onclick = function() {
+            if(confirm("Yakin ingin menghapus jadwal ini?")) {
+              deleteSchedule(schedule.id);
+            }
+          };
+
+          tdActions.appendChild(editBtn);
+          tdActions.appendChild(deleteBtn);
+
+          tr.appendChild(tdTitle);
+          tr.appendChild(tdDate);
+          tr.appendChild(tdDescription);
+          tr.appendChild(tdActions);
+
+          tbody.appendChild(tr);
+        });
+      }
+      updateURL();
+    }
+
+    // Menambahkan jadwal baru
+    function addSchedule(schedule) {
+      schedules.push(schedule);
+      renderSchedules();
+    }
+
+    // Menghapus jadwal berdasarkan id
+    function deleteSchedule(id) {
+      schedules = schedules.filter(s => s.id !== id);
+      renderSchedules();
+    }
+
+    // Mengedit jadwal dengan prompt (sederhana)
+    function editSchedule(id) {
+      const schedule = schedules.find(s => s.id === id);
+      if (!schedule) return;
+      const newTitle = prompt("Edit Judul", schedule.title);
+      if (newTitle === null) return;
+      const newDate = prompt("Edit Tanggal (YYYY-MM-DD)", schedule.date);
+      if (newDate === null) return;
+      const newDescription = prompt("Edit Deskripsi", schedule.description);
+      if (newDescription === null) return;
+      schedule.title = newTitle;
+      schedule.date = newDate;
+      schedule.description = newDescription;
+      renderSchedules();
+    }
+
+    // Event listener form tambah jadwal
+    document.getElementById('addScheduleForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const title = document.getElementById('title').value;
+      const date = document.getElementById('date').value;
+      const description = document.getElementById('description').value;
+      const schedule = { id: Date.now().toString(), title, date, description };
+      addSchedule(schedule);
+      this.reset();
+    });
+
+    // Fungsi untuk mendapatkan parameter dari URL
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    // Saat halaman load, periksa apakah ada data jadwal di URL
+    window.addEventListener('load', function() {
+      const dataParam = getQueryParam('data');
+      if (dataParam) {
+        schedules = decodeData(dataParam);
+      }
+      renderSchedules();
+    });
+  </script>
+</body>
+</html>
