@@ -4,11 +4,38 @@
   <meta charset="UTF-8">
   <!-- Meta viewport untuk tampilan responsif -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jadwal Acara dengan Countdown & Alarm</title>
+  <title>Jadwal Acara dengan Countdown, Alarm & Theme Toggle</title>
   <!-- Menggunakan Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* Reset dasar */
+    /* CSS Variables untuk Theme */
+    :root {
+      --background-color: #eef2f3;
+      --text-color: #333;
+      --container-background: #fff;
+      --heading-color: #007bff;
+      --button-background: #007bff;
+      --button-hover-background: #0056b3;
+      --input-border-color: #ccc;
+      --table-header-background: #f7f7f7;
+      --share-button-background: #25D366;
+      --share-button-hover-background: #1ebe57;
+      --countdown-color: #d9534f;
+    }
+    .dark-mode {
+      --background-color: #121212;
+      --text-color: #e0e0e0;
+      --container-background: #1e1e1e;
+      --heading-color: #66aaff;
+      --button-background: #66aaff;
+      --button-hover-background: #3388dd;
+      --input-border-color: #444;
+      --table-header-background: #333;
+      --share-button-background: #1ebe57;
+      --share-button-hover-background: #148f4f;
+      --countdown-color: #ff6666;
+    }
+    /* Reset dan dasar styling */
     * {
       margin: 0;
       padding: 0;
@@ -16,26 +43,26 @@
     }
     body {
       font-family: 'Poppins', sans-serif;
-      background: #eef2f3;
-      color: #333;
+      background: var(--background-color);
+      color: var(--text-color);
       padding: 20px;
+      transition: background 0.3s, color 0.3s;
     }
     .container {
       max-width: 900px;
       margin: 0 auto;
-      background: #fff;
+      background: var(--container-background);
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       overflow: hidden;
       padding: 30px;
+      position: relative;
+      transition: background 0.3s;
     }
     h1, h2 {
       text-align: center;
       margin-bottom: 20px;
-    }
-    h1 {
-      font-size: 2em;
-      color: #007bff;
+      color: var(--heading-color);
     }
     form {
       margin-bottom: 30px;
@@ -48,24 +75,89 @@
     input, button {
       width: 100%;
       padding: 10px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--input-border-color);
       border-radius: 5px;
       margin-bottom: 15px;
       font-size: 1em;
+      transition: border-color 0.3s;
     }
     input:focus {
       outline: none;
-      border-color: #007bff;
+      border-color: var(--heading-color);
     }
     button {
-      background-color: #007bff;
+      background-color: var(--button-background);
       color: #fff;
       cursor: pointer;
       border: none;
       transition: background-color 0.3s ease;
     }
     button:hover {
-      background-color: #0056b3;
+      background-color: var(--button-hover-background);
+    }
+    /* Toggle Switch untuk Dark/Light Mode */
+    .toggle-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+    .toggle-container input {
+      display: none;
+    }
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px;
+      height: 26px;
+      background-color: var(--button-background);
+      border-radius: 15px;
+      cursor: pointer;
+      position: relative;
+      transition: background-color 0.3s;
+    }
+    .toggle-label::after {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background-color: #fff;
+      border-radius: 50%;
+      left: 2px;
+      transition: transform 0.3s;
+    }
+    .toggle-label .toggle-icon {
+      position: absolute;
+      font-size: 16px;
+      transition: opacity 0.3s;
+    }
+    .toggle-label .sun {
+      left: 8px;
+      opacity: 1;
+    }
+    .toggle-label .moon {
+      right: 8px;
+      opacity: 0;
+    }
+    input:checked + .toggle-label {
+      background-color: var(--button-hover-background);
+    }
+    input:checked + .toggle-label::after {
+      transform: translateX(24px);
+    }
+    input:checked + .toggle-label .sun {
+      opacity: 0;
+    }
+    input:checked + .toggle-label .moon {
+      opacity: 1;
+    }
+    /* Global Countdown di atas tabel */
+    #globalCountdown {
+      text-align: center;
+      font-size: 1.2em;
+      font-weight: 600;
+      color: var(--countdown-color);
+      margin-bottom: 20px;
     }
     /* Bungkus tabel agar bisa di-scroll pada layar kecil */
     .table-container {
@@ -80,10 +172,10 @@
     th, td {
       text-align: left;
       padding: 12px;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid var(--input-border-color);
     }
     th {
-      background-color: #f7f7f7;
+      background-color: var(--table-header-background);
     }
     .actions button {
       width: auto;
@@ -100,19 +192,15 @@
       display: inline-block;
       text-decoration: none;
       color: #fff;
-      background-color: #25D366;
+      background-color: var(--share-button-background);
       padding: 10px 20px;
       border-radius: 5px;
       transition: background-color 0.3s ease;
     }
     .share-link a:hover {
-      background-color: #1ebe57;
+      background-color: var(--share-button-hover-background);
     }
-    .countdown {
-      font-weight: 600;
-      color: #d9534f;
-    }
-    /* Media query untuk perangkat mobile */
+    /* Responsif untuk perangkat mobile */
     @media (max-width: 600px) {
       .container {
         padding: 20px;
@@ -126,11 +214,24 @@
       th, td {
         font-size: 0.9em;
       }
+      .toggle-container {
+        top: 10px;
+        right: 10px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Toggle Switch untuk Dark/Light Mode -->
+    <div class="toggle-container">
+      <input type="checkbox" id="themeToggle">
+      <label for="themeToggle" class="toggle-label">
+        <span class="toggle-icon sun">🌞</span>
+        <span class="toggle-icon moon">🌜</span>
+      </label>
+    </div>
+    
     <h1>Jadwal Acara</h1>
     <!-- Form Input Acara -->
     <form id="addScheduleForm">
@@ -149,8 +250,10 @@
       <button type="submit">Tambah Acara</button>
     </form>
     
+    <!-- Global Countdown -->
+    <div id="globalCountdown">Tidak ada acara mendatang.</div>
+    
     <h2>Daftar Acara</h2>
-    <!-- Bungkus tabel dalam container agar bisa di-scroll -->
     <div class="table-container">
       <table id="scheduleTable">
         <thead>
@@ -159,7 +262,6 @@
             <th>Tanggal</th>
             <th>Jam Mulai</th>
             <th>Jam Selesai</th>
-            <th>Countdown</th>
             <th>Aksi</th>
           </tr>
         </thead>
@@ -201,6 +303,17 @@
       }
     }
 
+    // Fungsi untuk mengonversi waktu (HH:MM) ke format 12 jam dengan AM/PM
+    function convertTo12Hour(timeString) {
+      let parts = timeString.split(":");
+      let hours = parseInt(parts[0]);
+      let minutes = parts[1];
+      let period = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12;
+      if (hours === 0) hours = 12;
+      return hours + ":" + minutes + " " + period;
+    }
+
     // Update URL dengan data acara ter-encode dan perbarui link share
     function updateURL() {
       const encoded = encodeData(schedules);
@@ -210,14 +323,14 @@
       shareLink.href = 'https://wa.me/?text=' + encodeURIComponent("Cek jadwal acara ini: " + newURL);
     }
 
-    // Render data acara ke dalam tabel
+    // Render data acara ke dalam tabel (tanpa kolom countdown)
     function renderSchedules() {
       const tbody = document.getElementById('scheduleTable').getElementsByTagName('tbody')[0];
       tbody.innerHTML = ''; // Bersihkan tabel
       if (schedules.length === 0) {
         const tr = document.createElement('tr');
         const td = document.createElement('td');
-        td.colSpan = 6;
+        td.colSpan = 5;
         td.textContent = "Belum ada acara.";
         tr.appendChild(td);
         tbody.appendChild(tr);
@@ -232,15 +345,12 @@
           tdDate.textContent = schedule.date;
           
           const tdStart = document.createElement('td');
-          tdStart.textContent = schedule.startTime;
+          // Tampilkan waktu mulai dalam format 12 jam dengan AM/PM
+          tdStart.textContent = convertTo12Hour(schedule.startTime);
           
           const tdEnd = document.createElement('td');
-          tdEnd.textContent = schedule.endTime;
-          
-          const tdCountdown = document.createElement('td');
-          tdCountdown.id = 'countdown-' + schedule.id;
-          tdCountdown.className = 'countdown';
-          tdCountdown.textContent = '';
+          // Tampilkan waktu selesai dalam format 12 jam dengan AM/PM
+          tdEnd.textContent = convertTo12Hour(schedule.endTime);
           
           const tdActions = document.createElement('td');
           tdActions.className = 'actions';
@@ -268,7 +378,6 @@
           tr.appendChild(tdDate);
           tr.appendChild(tdStart);
           tr.appendChild(tdEnd);
-          tr.appendChild(tdCountdown);
           tr.appendChild(tdActions);
 
           tbody.appendChild(tr);
@@ -277,19 +386,19 @@
       updateURL();
     }
 
-    // Fungsi untuk menambahkan acara baru
+    // Tambahkan acara baru
     function addSchedule(schedule) {
       schedules.push(schedule);
       renderSchedules();
     }
 
-    // Fungsi untuk menghapus acara berdasarkan ID
+    // Hapus acara berdasarkan ID
     function deleteSchedule(id) {
       schedules = schedules.filter(s => s.id !== id);
       renderSchedules();
     }
 
-    // Fungsi untuk mengedit acara dengan prompt sederhana
+    // Edit acara dengan prompt sederhana
     function editSchedule(id) {
       const schedule = schedules.find(s => s.id === id);
       if (!schedule) return;
@@ -336,46 +445,61 @@
              (secs < 10 ? "0" : "") + secs;
     }
 
-    // Update countdown setiap detik
-    function updateCountdown() {
+    // Update global countdown di atas tabel untuk acara terdekat atau yang sedang berlangsung
+    function updateGlobalCountdown() {
       const now = new Date();
-      schedules.forEach(schedule => {
-        const countdownEl = document.getElementById('countdown-' + schedule.id);
-        if (!countdownEl) return;
-        const eventStart = new Date(schedule.date + "T" + schedule.startTime);
-        const eventEnd = new Date(schedule.date + "T" + schedule.endTime);
-        if (now < eventStart) {
-          // Countdown menuju acara dimulai
-          const diff = Math.floor((eventStart - now) / 1000);
-          countdownEl.textContent = formatCountdown(diff);
-        } else if (now >= eventStart && now < eventEnd) {
-          // Acara sedang berlangsung, hitung sisa waktu hingga selesai
-          const diff = Math.floor((eventEnd - now) / 1000);
-          countdownEl.textContent = "Sedang berlangsung - Sisa: " + formatCountdown(diff);
-          if (!schedule.notified) {
-            schedule.notified = true;
-            if ("Notification" in window && Notification.permission === "granted") {
-              new Notification("Acara " + schedule.name + " sedang berlangsung!");
-            }
-            const alarmSound = document.getElementById('alarmSound');
-            if (alarmSound) {
-              alarmSound.play().catch(err => console.error("Error playing sound:", err));
-            }
+      // Filter acara yang belum selesai (eventEnd > now)
+      const upcoming = schedules.filter(s => new Date(s.date + "T" + s.endTime) > now);
+      const globalCountdownEl = document.getElementById('globalCountdown');
+      if (upcoming.length === 0) {
+        globalCountdownEl.textContent = "Tidak ada acara mendatang.";
+        return;
+      }
+      // Sort acara berdasarkan waktu mulai
+      upcoming.sort((a, b) => new Date(a.date + "T" + a.startTime) - new Date(b.date + "T" + b.startTime));
+      const currentEvent = upcoming[0];
+      const eventStart = new Date(currentEvent.date + "T" + currentEvent.startTime);
+      const eventEnd = new Date(currentEvent.date + "T" + currentEvent.endTime);
+      let message = "";
+      if (now < eventStart) {
+        const diff = Math.floor((eventStart - now) / 1000);
+        message = "Countdown untuk \"" + currentEvent.name + "\" dimulai dalam: " + formatCountdown(diff);
+      } else if (now >= eventStart && now < eventEnd) {
+        const diff = Math.floor((eventEnd - now) / 1000);
+        message = "Acara \"" + currentEvent.name + "\" sedang berlangsung. Sisa waktu: " + formatCountdown(diff);
+        if (!currentEvent.notified) {
+          currentEvent.notified = true;
+          if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("Acara " + currentEvent.name + " sedang berlangsung!");
           }
-        } else {
-          countdownEl.textContent = "Acara selesai";
+          const alarmSound = document.getElementById('alarmSound');
+          if (alarmSound) {
+            alarmSound.play().catch(err => console.error("Error playing sound:", err));
+          }
         }
-      });
+      } else {
+        message = "Acara \"" + currentEvent.name + "\" selesai.";
+      }
+      globalCountdownEl.textContent = message;
     }
-    setInterval(updateCountdown, 1000);
 
-    // Saat halaman load, periksa data acara dari URL (jika ada)
+    
+    setInterval(updateGlobalCountdown, 1000);
+
+    
     window.addEventListener('load', function() {
       const dataParam = getQueryParam('data');
       if (dataParam) {
         schedules = decodeData(dataParam);
       }
       renderSchedules();
+      updateGlobalCountdown();
+    });
+
+    // Toggle Theme (Dark/Light) menggunakan input checkbox
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('change', function() {
+      document.body.classList.toggle('dark-mode', this.checked);
     });
   </script>
 </body>
