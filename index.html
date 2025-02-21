@@ -2,13 +2,13 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <!-- Meta viewport untuk responsif -->
+  <!-- Meta viewport untuk tampilan responsif -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jadwal Acara dengan Countdown & Alarm</title>
   <!-- Menggunakan Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* Reset dan dasar styling */
+    /* Reset dasar */
     * {
       margin: 0;
       padding: 0;
@@ -67,10 +67,15 @@
     button:hover {
       background-color: #0056b3;
     }
+    /* Bungkus tabel agar bisa di-scroll pada layar kecil */
+    .table-container {
+      overflow-x: auto;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
       margin-bottom: 20px;
+      min-width: 600px;
     }
     th, td {
       text-align: left;
@@ -107,7 +112,7 @@
       font-weight: 600;
       color: #d9534f;
     }
-    /* Responsif untuk perangkat kecil */
+    /* Media query untuk perangkat mobile */
     @media (max-width: 600px) {
       .container {
         padding: 20px;
@@ -115,10 +120,10 @@
       h1 {
         font-size: 1.5em;
       }
-      th, td {
+      input, button {
         font-size: 0.9em;
       }
-      button, input {
+      th, td {
         font-size: 0.9em;
       }
     }
@@ -145,21 +150,24 @@
     </form>
     
     <h2>Daftar Acara</h2>
-    <table id="scheduleTable">
-      <thead>
-        <tr>
-          <th>Nama Acara</th>
-          <th>Tanggal</th>
-          <th>Jam Mulai</th>
-          <th>Jam Selesai</th>
-          <th>Countdown</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Data acara akan muncul di sini -->
-      </tbody>
-    </table>
+    <!-- Bungkus tabel dalam container agar bisa di-scroll -->
+    <div class="table-container">
+      <table id="scheduleTable">
+        <thead>
+          <tr>
+            <th>Nama Acara</th>
+            <th>Tanggal</th>
+            <th>Jam Mulai</th>
+            <th>Jam Selesai</th>
+            <th>Countdown</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Data acara akan muncul di sini -->
+        </tbody>
+      </table>
+    </div>
     
     <!-- Link Bagikan via WhatsApp -->
     <div class="share-link">
@@ -173,7 +181,7 @@
   <script>
     let schedules = [];
 
-    // Meminta izin notifikasi jika memungkinkan
+    // Minta izin notifikasi jika memungkinkan
     if ("Notification" in window && Notification.permission !== "granted") {
       Notification.requestPermission();
     }
@@ -269,19 +277,19 @@
       updateURL();
     }
 
-    // Tambahkan acara baru
+    // Fungsi untuk menambahkan acara baru
     function addSchedule(schedule) {
       schedules.push(schedule);
       renderSchedules();
     }
 
-    // Hapus acara berdasarkan ID
+    // Fungsi untuk menghapus acara berdasarkan ID
     function deleteSchedule(id) {
       schedules = schedules.filter(s => s.id !== id);
       renderSchedules();
     }
 
-    // Edit acara dengan prompt sederhana
+    // Fungsi untuk mengedit acara dengan prompt sederhana
     function editSchedule(id) {
       const schedule = schedules.find(s => s.id === id);
       if (!schedule) return;
@@ -361,7 +369,7 @@
     }
     setInterval(updateCountdown, 1000);
 
-    // Saat halaman load, cek apakah ada data di URL
+    // Saat halaman load, periksa data acara dari URL (jika ada)
     window.addEventListener('load', function() {
       const dataParam = getQueryParam('data');
       if (dataParam) {
