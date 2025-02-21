@@ -2,80 +2,188 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Jadwal App</title>
+  <!-- Meta viewport untuk responsif -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jadwal Acara dengan Countdown & Alarm</title>
+  <!-- Menggunakan Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
+    /* Reset dan dasar styling */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
-      font-family: Arial, sans-serif;
-      margin: 2em;
-      max-width: 800px;
+      font-family: 'Poppins', sans-serif;
+      background: #eef2f3;
+      color: #333;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      padding: 30px;
     }
     h1, h2 {
-      color: #333;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 2em;
+      color: #007bff;
     }
     form {
-      margin-bottom: 1.5em;
+      margin-bottom: 30px;
     }
-    input, textarea, button {
-      padding: 0.5em;
-      margin: 0.2em 0;
+    label {
+      font-weight: 500;
+      margin-bottom: 5px;
+      display: block;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-bottom: 15px;
       font-size: 1em;
+    }
+    input:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+    button {
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 1em;
+      margin-bottom: 20px;
     }
     th, td {
-      border: 1px solid #ccc;
-      padding: 0.5em;
       text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
     }
-    button {
-      cursor: pointer;
+    th {
+      background-color: #f7f7f7;
+    }
+    .actions button {
+      width: auto;
+      margin-right: 5px;
+      margin-bottom: 5px;
+      padding: 5px 10px;
+      font-size: 0.9em;
+    }
+    .share-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .share-link a {
+      display: inline-block;
+      text-decoration: none;
+      color: #fff;
+      background-color: #25D366;
+      padding: 10px 20px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    .share-link a:hover {
+      background-color: #1ebe57;
+    }
+    .countdown {
+      font-weight: 600;
+      color: #d9534f;
+    }
+    /* Responsif untuk perangkat kecil */
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+      h1 {
+        font-size: 1.5em;
+      }
+      th, td {
+        font-size: 0.9em;
+      }
+      button, input {
+        font-size: 0.9em;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Jadwal App</h1>
-  <!-- Form untuk menambahkan jadwal baru -->
-  <form id="addScheduleForm">
-    <input type="text" id="title" placeholder="Judul" required>
-    <input type="date" id="date" required>
-    <br>
-    <textarea id="description" placeholder="Deskripsi" rows="3"></textarea>
-    <br>
-    <button type="submit">Tambah Jadwal</button>
-  </form>
-
-  <h2>Daftar Jadwal</h2>
-  <table id="scheduleTable">
-    <thead>
-      <tr>
-        <th>Judul</th>
-        <th>Tanggal</th>
-        <th>Deskripsi</th>
-        <th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Baris jadwal akan ditampilkan di sini -->
-    </tbody>
-  </table>
-
-  <!-- Link share via WhatsApp -->
-  <p>
-    <a id="shareLink" href="#" target="_blank">Bagikan via WhatsApp</a>
-  </p>
-
+  <div class="container">
+    <h1>Jadwal Acara</h1>
+    <!-- Form Input Acara -->
+    <form id="addScheduleForm">
+      <label for="eventName">Nama Acara</label>
+      <input type="text" id="eventName" placeholder="Masukkan Nama Acara" required>
+      
+      <label for="eventDate">Tanggal</label>
+      <input type="date" id="eventDate" required>
+      
+      <label for="eventStartTime">Jam Mulai</label>
+      <input type="time" id="eventStartTime" required>
+      
+      <label for="eventEndTime">Jam Selesai</label>
+      <input type="time" id="eventEndTime" required>
+      
+      <button type="submit">Tambah Acara</button>
+    </form>
+    
+    <h2>Daftar Acara</h2>
+    <table id="scheduleTable">
+      <thead>
+        <tr>
+          <th>Nama Acara</th>
+          <th>Tanggal</th>
+          <th>Jam Mulai</th>
+          <th>Jam Selesai</th>
+          <th>Countdown</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data acara akan muncul di sini -->
+      </tbody>
+    </table>
+    
+    <!-- Link Bagikan via WhatsApp -->
+    <div class="share-link">
+      <a id="shareLink" href="#" target="_blank">Bagikan via WhatsApp</a>
+    </div>
+  </div>
+  
+  <!-- Audio untuk Alarm -->
+  <audio id="alarmSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+  
   <script>
     let schedules = [];
 
-    // Fungsi untuk meng-encode data ke base64
+    // Meminta izin notifikasi jika memungkinkan
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+
+    // Fungsi untuk encode data ke base64
     function encodeData(data) {
       return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
     }
 
-    // Fungsi untuk mendecode data dari base64
+    // Fungsi untuk decode data dari base64
     function decodeData(encoded) {
       try {
         return JSON.parse(decodeURIComponent(escape(atob(encoded))));
@@ -85,38 +193,49 @@
       }
     }
 
-    // Update URL dengan data jadwal yang ter-encode dan update link WhatsApp
+    // Update URL dengan data acara ter-encode dan perbarui link share
     function updateURL() {
       const encoded = encodeData(schedules);
       const newURL = window.location.protocol + "//" + window.location.host + window.location.pathname + '?data=' + encoded;
       window.history.replaceState(null, '', newURL);
-      // Update link share
       const shareLink = document.getElementById('shareLink');
-      shareLink.href = 'https://wa.me/?text=' + encodeURIComponent("Cek jadwal ini: " + newURL);
+      shareLink.href = 'https://wa.me/?text=' + encodeURIComponent("Cek jadwal acara ini: " + newURL);
     }
 
-    // Render jadwal ke dalam tabel
+    // Render data acara ke dalam tabel
     function renderSchedules() {
       const tbody = document.getElementById('scheduleTable').getElementsByTagName('tbody')[0];
-      tbody.innerHTML = ''; // Kosongkan tabel
+      tbody.innerHTML = ''; // Bersihkan tabel
       if (schedules.length === 0) {
         const tr = document.createElement('tr');
         const td = document.createElement('td');
-        td.colSpan = 4;
-        td.textContent = "Belum ada jadwal.";
+        td.colSpan = 6;
+        td.textContent = "Belum ada acara.";
         tr.appendChild(td);
         tbody.appendChild(tr);
       } else {
         schedules.forEach(schedule => {
           const tr = document.createElement('tr');
 
-          const tdTitle = document.createElement('td');
-          tdTitle.textContent = schedule.title;
+          const tdName = document.createElement('td');
+          tdName.textContent = schedule.name;
+          
           const tdDate = document.createElement('td');
           tdDate.textContent = schedule.date;
-          const tdDescription = document.createElement('td');
-          tdDescription.textContent = schedule.description;
+          
+          const tdStart = document.createElement('td');
+          tdStart.textContent = schedule.startTime;
+          
+          const tdEnd = document.createElement('td');
+          tdEnd.textContent = schedule.endTime;
+          
+          const tdCountdown = document.createElement('td');
+          tdCountdown.id = 'countdown-' + schedule.id;
+          tdCountdown.className = 'countdown';
+          tdCountdown.textContent = '';
+          
           const tdActions = document.createElement('td');
+          tdActions.className = 'actions';
 
           // Tombol Edit
           const editBtn = document.createElement('button');
@@ -129,7 +248,7 @@
           const deleteBtn = document.createElement('button');
           deleteBtn.textContent = 'Hapus';
           deleteBtn.onclick = function() {
-            if(confirm("Yakin ingin menghapus jadwal ini?")) {
+            if (confirm("Yakin ingin menghapus acara ini?")) {
               deleteSchedule(schedule.id);
             }
           };
@@ -137,9 +256,11 @@
           tdActions.appendChild(editBtn);
           tdActions.appendChild(deleteBtn);
 
-          tr.appendChild(tdTitle);
+          tr.appendChild(tdName);
           tr.appendChild(tdDate);
-          tr.appendChild(tdDescription);
+          tr.appendChild(tdStart);
+          tr.appendChild(tdEnd);
+          tr.appendChild(tdCountdown);
           tr.appendChild(tdActions);
 
           tbody.appendChild(tr);
@@ -148,52 +269,99 @@
       updateURL();
     }
 
-    // Menambahkan jadwal baru
+    // Tambahkan acara baru
     function addSchedule(schedule) {
       schedules.push(schedule);
       renderSchedules();
     }
 
-    // Menghapus jadwal berdasarkan id
+    // Hapus acara berdasarkan ID
     function deleteSchedule(id) {
       schedules = schedules.filter(s => s.id !== id);
       renderSchedules();
     }
 
-    // Mengedit jadwal dengan prompt (sederhana)
+    // Edit acara dengan prompt sederhana
     function editSchedule(id) {
       const schedule = schedules.find(s => s.id === id);
       if (!schedule) return;
-      const newTitle = prompt("Edit Judul", schedule.title);
-      if (newTitle === null) return;
+      const newName = prompt("Edit Nama Acara", schedule.name);
+      if (newName === null) return;
       const newDate = prompt("Edit Tanggal (YYYY-MM-DD)", schedule.date);
       if (newDate === null) return;
-      const newDescription = prompt("Edit Deskripsi", schedule.description);
-      if (newDescription === null) return;
-      schedule.title = newTitle;
+      const newStartTime = prompt("Edit Jam Mulai (HH:MM)", schedule.startTime);
+      if (newStartTime === null) return;
+      const newEndTime = prompt("Edit Jam Selesai (HH:MM)", schedule.endTime);
+      if (newEndTime === null) return;
+      schedule.name = newName;
       schedule.date = newDate;
-      schedule.description = newDescription;
+      schedule.startTime = newStartTime;
+      schedule.endTime = newEndTime;
       renderSchedules();
     }
 
-    // Event listener form tambah jadwal
+    // Tangani event submit form
     document.getElementById('addScheduleForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const title = document.getElementById('title').value;
-      const date = document.getElementById('date').value;
-      const description = document.getElementById('description').value;
-      const schedule = { id: Date.now().toString(), title, date, description };
+      const name = document.getElementById('eventName').value;
+      const date = document.getElementById('eventDate').value;
+      const startTime = document.getElementById('eventStartTime').value;
+      const endTime = document.getElementById('eventEndTime').value;
+      const schedule = { id: Date.now().toString(), name, date, startTime, endTime, notified: false };
       addSchedule(schedule);
       this.reset();
     });
 
-    // Fungsi untuk mendapatkan parameter dari URL
+    // Fungsi untuk mendapatkan parameter URL
     function getQueryParam(name) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(name);
     }
 
-    // Saat halaman load, periksa apakah ada data jadwal di URL
+    // Format countdown menjadi HH:MM:SS
+    function formatCountdown(seconds) {
+      const hrs = Math.floor(seconds / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      return (hrs < 10 ? "0" : "") + hrs + ":" +
+             (mins < 10 ? "0" : "") + mins + ":" +
+             (secs < 10 ? "0" : "") + secs;
+    }
+
+    // Update countdown setiap detik
+    function updateCountdown() {
+      const now = new Date();
+      schedules.forEach(schedule => {
+        const countdownEl = document.getElementById('countdown-' + schedule.id);
+        if (!countdownEl) return;
+        const eventStart = new Date(schedule.date + "T" + schedule.startTime);
+        const eventEnd = new Date(schedule.date + "T" + schedule.endTime);
+        if (now < eventStart) {
+          // Countdown menuju acara dimulai
+          const diff = Math.floor((eventStart - now) / 1000);
+          countdownEl.textContent = formatCountdown(diff);
+        } else if (now >= eventStart && now < eventEnd) {
+          // Acara sedang berlangsung, hitung sisa waktu hingga selesai
+          const diff = Math.floor((eventEnd - now) / 1000);
+          countdownEl.textContent = "Sedang berlangsung - Sisa: " + formatCountdown(diff);
+          if (!schedule.notified) {
+            schedule.notified = true;
+            if ("Notification" in window && Notification.permission === "granted") {
+              new Notification("Acara " + schedule.name + " sedang berlangsung!");
+            }
+            const alarmSound = document.getElementById('alarmSound');
+            if (alarmSound) {
+              alarmSound.play().catch(err => console.error("Error playing sound:", err));
+            }
+          }
+        } else {
+          countdownEl.textContent = "Acara selesai";
+        }
+      });
+    }
+    setInterval(updateCountdown, 1000);
+
+    // Saat halaman load, cek apakah ada data di URL
     window.addEventListener('load', function() {
       const dataParam = getQueryParam('data');
       if (dataParam) {
